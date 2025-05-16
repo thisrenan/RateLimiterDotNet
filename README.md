@@ -37,7 +37,7 @@ dotnet add package Microsoft.AspNetCore.RateLimiting
 
 🛠️ Configuração em Program.cs (ASP.NET Core 7 ou superior)
 
-```dotnet
+```c#
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -45,6 +45,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
+// Criação da política permitindo apenas 4 requisições a cada janela de 12 segundos.
 builder.Services.AddRateLimiter(_ => _
     .AddFixedWindowLimiter(policyName: "fixed", options =>
     {
@@ -67,16 +68,14 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 List<PersonRecord> people = [
-    new ("Renan", "Romig", "renanromig@hotmail.com"),
-    new ("Arianne", "Romig", "annesantos.03@hotmail.com"),
+    new ("Renan", "Romig", "renanromig@outlook.com"),
+    new ("Arianne", "Romig", "arianneromig@outlook.com"),
     new ("Nicole", "Romig", "nicoleromig@hotmail.com")
     ];
 
 app.UseRateLimiter();
 
-static string GetTicks() => (DateTime.Now.Ticks & 0x11111).ToString("00000");
-
-app.MapGet("/", () => Results.Ok($"Hello {GetTicks()}")).RequireRateLimiting("fixed");
+// Rota com limitação pelo pacote
 app.MapGet("/person", () => people).RequireRateLimiting("fixed");
 app.MapGet("/person/{id}", (int id) => people[id]);
 app.MapPost("/person", (PersonRecord p) => people.Add(p));
